@@ -18,7 +18,6 @@ use std::time::Duration;
 
 const LCD_W: i32 = 160;
 const LCD_H: i32 = 43;
-const BYTES_PER_COL: usize = 6;      // ceil(43/8)
 const DATA_OFFSET: usize = 4;         // report ID + 3 padding bytes
 const BUF_LEN: usize = 992;           // 1 + 991 payload bytes
 
@@ -51,7 +50,8 @@ impl DrawTarget for G13Display {
     {
         for Pixel(Point { x, y }, color) in pixels {
             if x < 0 || x >= LCD_W || y < 0 || y >= LCD_H { continue; }
-            let idx = DATA_OFFSET + x as usize * BYTES_PER_COL + y as usize / 8;
+            // Page-major: page = y/8, byte = page*160 + x, bit = y%8 (LSB = top row)
+            let idx = DATA_OFFSET + (y as usize / 8) * LCD_W as usize + x as usize;
             let bit = 1u8 << (y as usize % 8);
             if color.is_on() { self.0[idx] |= bit; } else { self.0[idx] &= !bit; }
         }
@@ -181,25 +181,32 @@ fn discover_hidraw() -> Option<String> {
 }
 
 pub fn run() {
-    let path = match discover_hidraw() {
-        Some(p) => { eprintln!("g13d: LCD → {p}"); p }
-        None    => { eprintln!("g13d: no G13 LCD device found"); return; }
-    };
-
     let mut display = G13Display::new();
     let mut prev = match read_cpu() { Some(s) => s, None => return };
+    let mut path: Option<String> = None;
 
     loop {
         std::thread::sleep(Duration::from_secs(1));
+
+        // Re-discover hidraw on startup or after disconnect.
+        if path.is_none() {
+            path = discover_hidraw();
+            if let Some(ref p) = path {
+                eprintln!("g13d: LCD → {p}");
+            }
+        }
+
         let curr = match read_cpu() { Some(s) => s, None => continue };
         let cpu = cpu_pct(prev, curr);
         prev = curr;
         let mem = read_mem_pct();
 
-        render(&mut display, cpu, mem);
-        if let Err(e) = display.send(&path) {
-            eprintln!("g13d: LCD write error: {e}");
-            std::thread::sleep(Duration::from_secs(2));
+        if let Some(ref p) = path.clone() {
+            render(&mut display, cpu, mem);
+            if let Err(e) = display.send(p) {
+                eprintln!("g13d: LCD write error: {e}");
+                path = None; // trigger re-discovery next tick
+            }
         }
     }
 }
