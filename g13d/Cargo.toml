@@ -9,3 +9,4 @@ g13-config = { path = "../g13-config" }
 evdev = "0.12"
 anyhow = "1"
 embedded-graphics = "0.8"
+libc = "0.2"
