@@ -338,10 +338,10 @@ impl App {
                 ui.label("Right");
                 ui.text_edit_singleline(&mut t.right);
                 ui.end_row();
-                ui.label("Btn1 (lower)");
+                ui.label("Btn1 (left of stick)");
                 ui.text_edit_singleline(&mut t.button1);
                 ui.end_row();
-                ui.label("Btn2 (upper)");
+                ui.label("Btn2 (below stick)");
                 ui.text_edit_singleline(&mut t.button2);
                 ui.end_row();
             });

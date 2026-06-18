@@ -58,10 +58,10 @@ pub struct Thumbstick {
     pub left: String,
     #[serde(default = "d_right")]
     pub right: String,
-    /// BTN_BASE binding (lower button beside thumbstick); empty = unbound.
+    /// BTN_BASE binding (button left of thumbstick); empty = unbound.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub button1: String,
-    /// BTN_BASE2 binding (upper button beside thumbstick); empty = unbound.
+    /// BTN_BASE2 binding (button below thumbstick); empty = unbound.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub button2: String,
 }
