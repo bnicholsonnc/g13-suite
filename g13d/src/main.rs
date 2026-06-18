@@ -3,6 +3,7 @@
 
 mod keypad;
 mod keys;
+mod lcd;
 mod thumbstick;
 
 use anyhow::{Context, Result};
@@ -21,6 +22,8 @@ fn main() -> Result<()> {
 
     eprintln!("g13d: config {}", cfg_path.display());
     let cfg = Config::load(&cfg_path)?;
+
+    thread::spawn(lcd::run);
 
     loop {
         match run_once(&cfg, led_override.clone()) {
