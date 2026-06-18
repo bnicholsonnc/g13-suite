@@ -338,6 +338,9 @@ impl App {
                 ui.label("Right");
                 ui.text_edit_singleline(&mut t.right);
                 ui.end_row();
+                ui.label("Thumb (press down)");
+                ui.text_edit_singleline(&mut t.thumb);
+                ui.end_row();
                 ui.label("Btn1 (left of stick)");
                 ui.text_edit_singleline(&mut t.button1);
                 ui.end_row();

@@ -20,7 +20,7 @@ pub struct Stick {
     cfg: StickCfg,
     keys_mode: bool,
     k_up: Key, k_down: Key, k_left: Key, k_right: Key,
-    k_btn1: Option<Key>, k_btn2: Option<Key>,
+    k_thumb: Option<Key>, k_btn1: Option<Key>, k_btn2: Option<Key>,
     up_on: bool, down_on: bool, left_on: bool, right_on: bool,
 }
 
@@ -31,12 +31,14 @@ impl Stick {
         let keys_mode = cfg.mode != "gamepad";
         let (k_up, k_down, k_left, k_right) =
             (output_key(&cfg.up)?, output_key(&cfg.down)?, output_key(&cfg.left)?, output_key(&cfg.right)?);
+        let k_thumb = if cfg.thumb.is_empty() { None } else { Some(output_key(&cfg.thumb)?) };
         let k_btn1 = if cfg.button1.is_empty() { None } else { Some(output_key(&cfg.button1)?) };
         let k_btn2 = if cfg.button2.is_empty() { None } else { Some(output_key(&cfg.button2)?) };
 
         let out = if keys_mode {
             let mut set: AttributeSet<Key> = AttributeSet::new();
             for k in [k_up, k_down, k_left, k_right] { set.insert(k); }
+            if let Some(k) = k_thumb { set.insert(k); }
             if let Some(k) = k_btn1 { set.insert(k); }
             if let Some(k) = k_btn2 { set.insert(k); }
             VirtualDeviceBuilder::new().context("vkbd")?
@@ -56,7 +58,7 @@ impl Stick {
         };
 
         Ok(Stick { dev, out, cfg: cfg.clone(), keys_mode,
-            k_up, k_down, k_left, k_right, k_btn1, k_btn2,
+            k_up, k_down, k_left, k_right, k_thumb, k_btn1, k_btn2,
             up_on: false, down_on: false, left_on: false, right_on: false })
     }
 
@@ -106,6 +108,7 @@ impl Stick {
                     }
                     InputEventKind::Key(k) if self.keys_mode => {
                         let mapped = match k {
+                            Key::BTN_THUMB => self.k_thumb,
                             Key::BTN_BASE => self.k_btn1,
                             Key::BTN_BASE2 => self.k_btn2,
                             _ => None,

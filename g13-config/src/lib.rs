@@ -58,6 +58,9 @@ pub struct Thumbstick {
     pub left: String,
     #[serde(default = "d_right")]
     pub right: String,
+    /// BTN_THUMB binding (pressing the thumbstick down); empty = unbound.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub thumb: String,
     /// BTN_BASE binding (button left of thumbstick); empty = unbound.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub button1: String,
@@ -71,7 +74,7 @@ impl Default for Thumbstick {
         Thumbstick {
             mode: d_mode(), deadzone: d_dz(), invert_x: false, invert_y: false,
             up: d_up(), down: d_down(), left: d_left(), right: d_right(),
-            button1: String::new(), button2: String::new(),
+            thumb: String::new(), button1: String::new(), button2: String::new(),
         }
     }
 }
