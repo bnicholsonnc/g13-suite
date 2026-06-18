@@ -3,6 +3,6 @@ Type=Application
 Name=G13 Configurator
 Comment=Configure the Logitech G13 keypad
 Exec=g13-gui
-Icon=input-gaming
+Icon=g13-configurator
 Terminal=false
 Categories=Utility;Settings;
