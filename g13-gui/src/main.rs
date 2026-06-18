@@ -152,7 +152,7 @@ impl App {
 
     fn top_bar(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
-            ui.heading("G13 Configurator");
+            ui.heading("G13 Suite");
             ui.separator();
             ui.label("Profile:");
             let names: Vec<String> = self.cfg.profiles.keys().cloned().collect();
@@ -574,11 +574,11 @@ fn main() -> eframe::Result<()> {
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([960.0, 640.0])
-            .with_title("G13 Configurator"),
+            .with_title("G13 Suite"),
         ..Default::default()
     };
     eframe::run_native(
-        "G13 Configurator",
+        "G13 Suite",
         native_options,
         Box::new(|cc| Ok(Box::new(App::new(cc)) as Box<dyn eframe::App>)),
     )

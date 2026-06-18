@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=G13 Configurator
+Name=G13 Suite
 Comment=Configure the Logitech G13 keypad
 Exec=g13-gui
 Icon=g13-configurator
