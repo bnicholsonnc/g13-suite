@@ -399,6 +399,17 @@ impl App {
         } else {
             ui.label(egui::RichText::new("No G13 backlight LED detected.").color(egui::Color32::from_gray(150)).size(11.0));
         }
+
+        ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
+            ui.add_space(8.0);
+            let btn = egui::Button::new("Sponsor on GitHub")
+                .fill(egui::Color32::from_rgb(36, 163, 74));
+            if ui.add(btn).clicked() {
+                let _ = std::process::Command::new("xdg-open")
+                    .arg("https://github.com/sponsors/bnicholsonnc")
+                    .spawn();
+            }
+        });
     }
 
     fn edit_window(&mut self, ctx: &egui::Context) {
