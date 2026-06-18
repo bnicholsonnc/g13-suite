@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=G13 Configurator
+Comment=Configure the Logitech G13 keypad
+Exec=g13-gui
+Icon=input-gaming
+Terminal=false
+Categories=Utility;Settings;

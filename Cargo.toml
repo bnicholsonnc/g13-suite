@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["g13-config", "g13d", "g13-config-ui"]
+# g13-gui (native egui app) is excluded so it builds standalone; it needs a newer
+# Rust than some CI/sandbox toolchains. Build it with: cd g13-gui && cargo build --release
+exclude = ["g13-gui"]
+
+[workspace.package]
+version = "0.2.0"
+edition = "2021"
+license = "MIT"

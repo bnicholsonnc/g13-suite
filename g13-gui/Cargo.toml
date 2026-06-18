@@ -1,0 +1,11 @@
+[package]
+name = "g13-gui"
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+g13-config = { path = "../g13-config" }
+eframe = "=0.29.1"
+image = { version = "0.25", default-features = false, features = ["png"] }
+anyhow = "1"

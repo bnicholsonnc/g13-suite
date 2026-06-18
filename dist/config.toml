@@ -1,0 +1,39 @@
+# g13d configuration. Edit by hand, or use the GUI:  g13-config
+# Bindings hold while pressed (Space = ascend on a flying mount).
+
+[profiles.default]
+# color = "255,128,0"      # optional RGB backlight for this profile
+[profiles.default.keys]
+G1  = "GRAVE"
+G2  = "1"
+G3  = "2"
+G4  = "3"
+G5  = "4"
+G6  = "5"
+G7  = "6"
+G8  = "TAB"
+G9  = "7"
+G10 = "8"
+G11 = "9"
+G12 = "0"
+G13 = "MINUS"
+G14 = "EQUAL"
+G15 = "SPACE"
+G19 = "B"
+G20 = "LEFTSHIFT"
+G22 = "M"
+
+[thumbstick]
+mode = "keys"     # keys = WASD/backpedal ; gamepad = analog ; off = raw
+deadzone = 50
+invert_x = false
+invert_y = false
+up = "W"
+down = "S"
+left = "A"
+right = "D"
+
+# Switch profiles with the M-keys (uncomment once you add profiles):
+# [profile_keys]
+# M1 = "default"
+# M2 = "raid"

@@ -1,0 +1,10 @@
+[package]
+name = "g13-config"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.5"
+anyhow = "1"

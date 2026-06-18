@@ -1,0 +1,17 @@
+[Unit]
+Description=g13d - Logitech G13 userspace daemon
+After=systemd-udev-settle.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/g13d /etc/g13d/config.toml
+Restart=always
+RestartSec=2
+SupplementaryGroups=input
+DeviceAllow=/dev/uinput rw
+DeviceAllow=char-input rw
+# allow writing the backlight LED:
+ReadWritePaths=/sys/class/leds
+
+[Install]
+WantedBy=multi-user.target

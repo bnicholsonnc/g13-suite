@@ -1,0 +1,4 @@
+# Make the G13 RGB backlight writable by the 'input' group so the GUI can do
+# live colour preview without root. (Saving still applies via the daemon.)
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="g13:rgb:kbd_backlight", \
+  RUN+="/bin/sh -c 'chgrp input /sys/class/leds/%k/brightness /sys/class/leds/%k/multi_intensity && chmod 664 /sys/class/leds/%k/brightness /sys/class/leds/%k/multi_intensity'"

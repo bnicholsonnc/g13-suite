@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>G13 Configurator</title>
+<style>
+  :root { --bg:#15171c; --panel:#1e2128; --line:#2c313b; --accent:#e8a13a; --txt:#e6e8ec; --mut:#9aa3b2; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif; }
+  header { display:flex; align-items:center; gap:14px; padding:12px 18px; background:var(--panel); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+  header h1 { font-size:16px; margin:0; font-weight:600; letter-spacing:.3px; }
+  header .spacer { flex:1; }
+  select, input, button { font:inherit; color:var(--txt); background:#262b34; border:1px solid var(--line); border-radius:6px; padding:6px 9px; }
+  button { cursor:pointer; }
+  button.primary { background:var(--accent); color:#1a1207; border-color:var(--accent); font-weight:600; }
+  button.ghost { background:transparent; }
+  .wrap { display:grid; grid-template-columns: minmax(420px,1fr) 340px; gap:18px; padding:18px; max-width:1200px; margin:0 auto; }
+  @media (max-width:900px){ .wrap{ grid-template-columns:1fr; } }
+  .board { position:relative; width:100%; }
+  .board img { width:100%; display:block; border-radius:10px; }
+  .hot { position:absolute; transform:translate(-50%,-50%); width:8.2%; height:7.5%;
+         border:1.5px solid rgba(232,161,58,.5); background:rgba(20,22,28,.35);
+         border-radius:6px; display:flex; align-items:center; justify-content:center;
+         font-size:11px; color:var(--txt); cursor:pointer; text-align:center; overflow:hidden;
+         backdrop-filter:blur(1px); transition:background .1s,border-color .1s; padding:1px; }
+  .hot:hover { background:rgba(232,161,58,.25); border-color:var(--accent); }
+  .hot.mkey { border-color:rgba(120,170,255,.55); }
+  .hot.mkey:hover { background:rgba(120,170,255,.2); border-color:#7aa8ff; }
+  .hot .lbl { font-weight:600; pointer-events:none; }
+  .hot .sub { font-size:9px; color:var(--mut); pointer-events:none; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:16px; }
+  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--mut); margin:0 0 10px; }
+  .row { display:flex; align-items:center; gap:8px; margin:7px 0; }
+  .row label { width:92px; color:var(--mut); }
+  .row input[type=text], .row select { flex:1; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .status { font-size:12px; color:var(--mut); }
+  .status.ok { color:#6fcf7f; } .status.err { color:#e06b6b; }
+  dialog { background:var(--panel); color:var(--txt); border:1px solid var(--line); border-radius:12px; padding:18px; width:340px; }
+  dialog::backdrop { background:rgba(0,0,0,.55); }
+  dialog h3 { margin:0 0 12px; font-size:15px; }
+  .hint { font-size:12px; color:var(--mut); margin-top:8px; }
+  .pillrow { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .pillrow button { padding:3px 8px; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>G13 Configurator</h1>
+  <label class="status">Profile</label>
+  <select id="profileSel"></select>
+  <button class="ghost" id="addProfile">+ New</button>
+  <button class="ghost" id="renProfile">Rename</button>
+  <button class="ghost" id="delProfile">Delete</button>
+  <span class="spacer"></span>
+  <span id="status" class="status"></span>
+  <button class="primary" id="saveBtn">Save &amp; Apply</button>
+</header>
+
+<div class="wrap">
+  <div>
+    <div class="board" id="board">
+      <img src="/g13.png" alt="G13"/>
+      <!-- hotspots injected here -->
+    </div>
+    <p class="hint">Click a grey key to bind it. Click a blue <b>M-key</b> to make it switch profiles. Bindings hold while pressed (e.g. Space = ascend on a flying mount).</p>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Thumbstick</h2>
+      <div class="row"><label>Mode</label>
+        <select id="ts_mode">
+          <option value="keys">Keys (WASD / backpedal)</option>
+          <option value="gamepad">Gamepad (analog, auto-face)</option>
+          <option value="off">Off (raw)</option>
+        </select></div>
+      <div class="row"><label>Deadzone</label><input type="range" id="ts_dz" min="0" max="120"><span id="ts_dz_v" class="status"></span></div>
+      <div class="row"><label>Invert X</label><input type="checkbox" id="ts_ix"></div>
+      <div class="row"><label>Invert Y</label><input type="checkbox" id="ts_iy"></div>
+      <div id="ts_keys">
+        <div class="grid2">
+          <div class="row"><label>Up</label><input type="text" id="ts_up"></div>
+          <div class="row"><label>Down</label><input type="text" id="ts_down"></div>
+          <div class="row"><label>Left</label><input type="text" id="ts_left"></div>
+          <div class="row"><label>Right</label><input type="text" id="ts_right"></div>
+        </div>
+        <p class="hint">For strafe (facing forward sideways) set Left/Right to your WoW strafe keys (Q/E).</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Backlight (this profile)</h2>
+      <div class="row"><label>Colour</label><input type="color" id="rgb"><button class="ghost" id="rgbClear">No colour</button></div>
+      <div class="row"><label>LED node</label><select id="ledSel"></select></div>
+      <p class="hint" id="ledHint"></p>
+    </div>
+  </div>
+</div>
+
+<dialog id="editDlg">
+  <h3 id="dlgTitle">Bind key</h3>
+  <div id="dlgBind">
+    <div class="row"><label>Output</label><input type="text" id="dlgVal" placeholder="e.g. SPACE, 1, LEFTCTRL+1" list="keylist"></div>
+    <datalist id="keylist"></datalist>
+    <div class="pillrow" id="quickKeys"></div>
+    <p class="hint">Use <b>+</b> for chords: <code>LEFTCTRL+LEFTSHIFT+EQUAL</code>. Leave blank to unbind.</p>
+  </div>
+  <div id="dlgMkey" style="display:none">
+    <div class="row"><label>Switches to</label><select id="dlgProfile"></select></div>
+    <p class="hint">Pressing this M-key activates the chosen profile.</p>
+  </div>
+  <div class="row" style="margin-top:14px; justify-content:flex-end">
+    <button class="ghost" id="dlgCancel">Cancel</button>
+    <button class="primary" id="dlgOk">OK</button>
+  </div>
+</dialog>
+
+<script>
+// ---- key hotspot layout (percent of image) ----
+const KEYS = [
+  {id:"M1",x:27.0,y:18.8,m:true},{id:"M2",x:41.0,y:18.8,m:true},{id:"M3",x:55.0,y:18.8,m:true},{id:"MR",x:68.1,y:18.8,m:true},
+  {id:"G1",x:22.3,y:30.0},{id:"G2",x:31.8,y:30.0},{id:"G3",x:41.2,y:30.0},{id:"G4",x:50.6,y:30.0},{id:"G5",x:60.0,y:30.0},{id:"G6",x:69.5,y:30.0},{id:"G7",x:78.9,y:30.0},
+  {id:"G8",x:24.4,y:38.7},{id:"G9",x:34.0,y:38.7},{id:"G10",x:43.6,y:38.7},{id:"G11",x:53.2,y:38.7},{id:"G12",x:62.5,y:38.7},{id:"G13",x:71.9,y:38.7},{id:"G14",x:80.3,y:38.7},
+  {id:"G15",x:30.2,y:48.5},{id:"G16",x:40.7,y:48.5},{id:"G17",x:51.1,y:48.5},{id:"G18",x:61.4,y:48.5},{id:"G19",x:72.4,y:48.5},
+  {id:"G20",x:36.6,y:57.6},{id:"G21",x:49.7,y:57.6},{id:"G22",x:60.2,y:57.6}
+];
+const COMMON = ["SPACE","TAB","LEFTSHIFT","LEFTCTRL","LEFTALT","ESC","ENTER","B","M","GRAVE","MINUS","EQUAL","F1","F2","F3","F4","1","2","3","4","5","6","7","8","9","0"];
+
+let cfg = null;       // working config
+let active = "default";
+
+function emptyCfg(){ return {profiles:{default:{keys:{},color:null}}, bindings:{}, thumbstick:{mode:"keys",deadzone:50,invert_x:false,invert_y:false,up:"W",down:"S",left:"A",right:"D"}, profile_keys:{}}; }
+
+function normalize(c){
+  c = c || emptyCfg();
+  if(!c.profiles) c.profiles = {};
+  // fold [bindings] shorthand into profiles.default
+  if(c.bindings && Object.keys(c.bindings).length){
+    c.profiles.default = c.profiles.default || {keys:{},color:null};
+    for(const k in c.bindings){ if(!(k in c.profiles.default.keys)) c.profiles.default.keys[k]=c.bindings[k]; }
+  }
+  c.bindings = {};
+  if(Object.keys(c.profiles).length===0) c.profiles.default={keys:{},color:null};
+  for(const p in c.profiles){ c.profiles[p].keys = c.profiles[p].keys || {}; if(c.profiles[p].color===undefined) c.profiles[p].color=null; }
+  c.thumbstick = Object.assign({mode:"keys",deadzone:50,invert_x:false,invert_y:false,up:"W",down:"S",left:"A",right:"D"}, c.thumbstick||{});
+  c.profile_keys = c.profile_keys || {};
+  return c;
+}
+
+async function load(){
+  try{ const r=await fetch('/api/config'); cfg=normalize(await r.json()); }
+  catch(e){ cfg=normalize(emptyCfg()); }
+  active = cfg.profiles.default ? "default" : Object.keys(cfg.profiles)[0];
+  buildProfiles(); buildBoard(); bindThumb(); bindRgb(); await loadLeds();
+}
+
+function buildProfiles(){
+  const sel=document.getElementById('profileSel'); sel.innerHTML='';
+  for(const p in cfg.profiles){ const o=document.createElement('option'); o.value=p; o.textContent=p; sel.appendChild(o); }
+  sel.value=active;
+  // dialog profile dropdown for M-keys
+  const dp=document.getElementById('dlgProfile'); dp.innerHTML='';
+  for(const p in cfg.profiles){ const o=document.createElement('option'); o.value=p; o.textContent=p; dp.appendChild(o); }
+}
+
+function buildBoard(){
+  const board=document.getElementById('board');
+  board.querySelectorAll('.hot').forEach(e=>e.remove());
+  for(const k of KEYS){
+    const d=document.createElement('div');
+    d.className='hot'+(k.m?' mkey':'');
+    d.style.left=k.x+'%'; d.style.top=k.y+'%';
+    let main=k.id, sub='';
+    if(k.m){ const tgt=cfg.profile_keys[k.id]; sub = tgt?('→ '+tgt):''; }
+    else { const v=cfg.profiles[active].keys[k.id]; sub = v||''; }
+    d.innerHTML='<div><div class="lbl">'+main+'</div>'+(sub?('<div class="sub">'+sub+'</div>'):'')+'</div>';
+    d.onclick=()=>openEditor(k);
+    board.appendChild(d);
+  }
+}
+
+// ---- editor dialog ----
+const dlg=document.getElementById('editDlg');
+let editing=null;
+function openEditor(k){
+  editing=k;
+  document.getElementById('dlgTitle').textContent=(k.m?'M-key: ':'Bind ')+k.id;
+  document.getElementById('dlgBind').style.display=k.m?'none':'block';
+  document.getElementById('dlgMkey').style.display=k.m?'block':'none';
+  if(k.m){ document.getElementById('dlgProfile').value=cfg.profile_keys[k.id]||Object.keys(cfg.profiles)[0]; }
+  else {
+    document.getElementById('dlgVal').value=cfg.profiles[active].keys[k.id]||'';
+    const qk=document.getElementById('quickKeys'); qk.innerHTML='';
+    COMMON.slice(0,12).forEach(c=>{ const b=document.createElement('button'); b.textContent=c; b.className='ghost'; b.onclick=()=>{document.getElementById('dlgVal').value=c;}; qk.appendChild(b); });
+  }
+  dlg.showModal();
+}
+document.getElementById('dlgCancel').onclick=()=>dlg.close();
+document.getElementById('dlgOk').onclick=()=>{
+  if(editing.m){
+    const v=document.getElementById('dlgProfile').value;
+    cfg.profile_keys[editing.id]=v;
+  } else {
+    const v=document.getElementById('dlgVal').value.trim();
+    if(v) cfg.profiles[active].keys[editing.id]=v; else delete cfg.profiles[active].keys[editing.id];
+  }
+  dlg.close(); buildBoard();
+};
+
+// datalist
+const kl=document.getElementById('keylist'); COMMON.forEach(c=>{const o=document.createElement('option');o.value=c;kl.appendChild(o);});
+
+// ---- thumbstick ----
+function bindThumb(){
+  const t=cfg.thumbstick;
+  const set=(id,val)=>document.getElementById(id).value=val;
+  document.getElementById('ts_mode').value=t.mode;
+  document.getElementById('ts_dz').value=t.deadzone; document.getElementById('ts_dz_v').textContent=t.deadzone;
+  document.getElementById('ts_ix').checked=t.invert_x; document.getElementById('ts_iy').checked=t.invert_y;
+  set('ts_up',t.up);set('ts_down',t.down);set('ts_left',t.left);set('ts_right',t.right);
+  const upd=()=>{ t.mode=document.getElementById('ts_mode').value; t.deadzone=+document.getElementById('ts_dz').value;
+    t.invert_x=document.getElementById('ts_ix').checked; t.invert_y=document.getElementById('ts_iy').checked;
+    t.up=document.getElementById('ts_up').value; t.down=document.getElementById('ts_down').value;
+    t.left=document.getElementById('ts_left').value; t.right=document.getElementById('ts_right').value;
+    document.getElementById('ts_dz_v').textContent=t.deadzone;
+    document.getElementById('ts_keys').style.opacity = t.mode==='keys'?1:.45; };
+  ['ts_mode','ts_dz','ts_ix','ts_iy','ts_up','ts_down','ts_left','ts_right'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',upd);
+  });
+  upd();
+}
+
+// ---- RGB ----
+function curColorHex(){ const c=cfg.profiles[active].color; if(!c) return '#000000';
+  const p=c.split(',').map(x=>parseInt(x.trim())||0); return '#'+p.map(n=>n.toString(16).padStart(2,'0')).join(''); }
+function bindRgb(){
+  const inp=document.getElementById('rgb'); inp.value=curColorHex();
+  inp.oninput=async ()=>{ const h=inp.value; const r=parseInt(h.substr(1,2),16),g=parseInt(h.substr(3,2),16),b=parseInt(h.substr(5,2),16);
+    cfg.profiles[active].color=r+','+g+','+b;
+    const led=document.getElementById('ledSel').value||null;
+    try{ const resp=await fetch('/api/rgb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({r,g,b,led})});
+      const j=await resp.json(); const s=document.getElementById('status');
+      if(j.ok){ s.className='status ok'; s.textContent='Live preview: '+r+','+g+','+b; }
+      else { s.className='status err'; s.textContent='Backlight: '+(j.error||'failed'); }
+    }catch(e){ const s=document.getElementById('status'); s.className='status err'; s.textContent='Preview failed: '+e; } };
+  document.getElementById('rgbClear').onclick=()=>{ cfg.profiles[active].color=null; inp.value='#000000'; };
+}
+async function loadLeds(){
+  try{ const r=await fetch('/api/leds'); const j=await r.json();
+    const sel=document.getElementById('ledSel'); sel.innerHTML='';
+    const auto=document.createElement('option'); auto.value=''; auto.textContent='(auto-detect)'; sel.appendChild(auto);
+    (j.leds||[]).forEach(n=>{const o=document.createElement('option');o.value='/sys/class/leds/'+n;o.textContent=n;sel.appendChild(o);});
+    document.getElementById('ledHint').textContent = j.discovered? ('Detected: '+j.discovered) : 'No G13 backlight LED auto-detected.';
+  }catch(e){}
+}
+
+// ---- profile management ----
+document.getElementById('profileSel').onchange=e=>{ active=e.target.value; buildBoard(); document.getElementById('rgb').value=curColorHex(); };
+document.getElementById('addProfile').onclick=()=>{ const n=prompt('New profile name:'); if(!n) return; if(cfg.profiles[n]){alert('exists');return;} cfg.profiles[n]={keys:{},color:null}; active=n; buildProfiles(); buildBoard(); };
+document.getElementById('renProfile').onclick=()=>{ const n=prompt('Rename "'+active+'" to:',active); if(!n||n===active) return; cfg.profiles[n]=cfg.profiles[active]; delete cfg.profiles[active];
+  for(const m in cfg.profile_keys){ if(cfg.profile_keys[m]===active) cfg.profile_keys[m]=n; } active=n; buildProfiles(); buildBoard(); };
+document.getElementById('delProfile').onclick=()=>{ if(Object.keys(cfg.profiles).length<=1){alert('keep at least one');return;} if(!confirm('Delete "'+active+'"?'))return;
+  delete cfg.profiles[active]; for(const m in cfg.profile_keys){ if(cfg.profile_keys[m]===active) delete cfg.profile_keys[m]; } active=Object.keys(cfg.profiles)[0]; buildProfiles(); buildBoard(); };
+
+// ---- save ----
+document.getElementById('saveBtn').onclick=async()=>{
+  const s=document.getElementById('status'); s.className='status'; s.textContent='Saving…';
+  // strip null colors so they serialize cleanly
+  const out=JSON.parse(JSON.stringify(cfg));
+  for(const p in out.profiles){ if(!out.profiles[p].color) delete out.profiles[p].color; }
+  out.bindings={};
+  try{
+    const r=await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(out)});
+    const j=await r.json();
+    if(j.ok){ s.className='status ok'; s.textContent='Saved & daemon reloaded.'; }
+    else { s.className='status err'; s.textContent='Error: '+(j.error||'unknown'); }
+  }catch(e){ s.className='status err'; s.textContent='Request failed: '+e; }
+};
+
+load();
+</script>
+</body>
+</html>

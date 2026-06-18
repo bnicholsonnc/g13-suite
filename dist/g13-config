@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Launch the G13 web configurator (needs admin to write config + control RGB).
+set -e
+ADDR="${G13_UI_ADDR:-127.0.0.1:8137}"
+echo "Starting G13 Configurator…"
+pkexec env G13_UI_ADDR="$ADDR" G13_CONFIG=/etc/g13d/config.toml /usr/local/bin/g13-config-ui &
+PID=$!
+sleep 1.2
+if command -v xdg-open >/dev/null; then xdg-open "http://$ADDR/" >/dev/null 2>&1 || true; fi
+echo "Opened http://$ADDR/  — close this terminal or press Ctrl+C to stop."
+wait "$PID"

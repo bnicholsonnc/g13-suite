@@ -1,0 +1,2 @@
+# /dev/uinput writable by the input group (daemon creates virtual devices)
+KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
