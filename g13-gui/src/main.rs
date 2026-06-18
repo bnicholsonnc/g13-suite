@@ -409,6 +409,12 @@ impl App {
                     .arg("https://github.com/sponsors/bnicholsonnc")
                     .spawn();
             }
+            ui.label(
+                egui::RichText::new("If you find g13-suite useful, please consider\nsponsoring to support future development.")
+                    .color(egui::Color32::from_gray(150))
+                    .size(11.0),
+            );
+            ui.separator();
         });
     }
 
